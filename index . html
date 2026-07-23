@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Share My Location</title>
+</head>
+<body>
+  <h2>Share Your Current Location</h2>
+  <button onclick="getLocation()">Share Location</button>
+
+  <p id="status"></p>
+
+  <script>
+    function getLocation() {
+      const status = document.getElementById("status");
+
+      if (!navigator.geolocation) {
+        status.textContent = "Geolocation is not supported by your browser.";
+        return;
+      }
+
+      status.textContent = "Requesting your location...";
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          status.innerHTML =
+            `Latitude: ${lat}<br>` +
+            `Longitude: ${lng}<br><br>` +
+            `<a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank">
+              Open in Google Maps
+            </a>`;
+
+          // You could also send the coordinates to your own server here.
+        },
+        function(error) {
+          status.textContent = "Location access was denied or unavailable.";
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+  </script>
+</body>
+</html>
