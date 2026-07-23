@@ -1,51 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Share My Location</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Share My Location</title>
 </head>
 <body>
-  <h2>Share Your Current Location</h2>
-  <button onclick="getLocation()">Share Location</button>
 
-  <p id="status"></p>
+<h2>Share Your Current Location</h2>
 
-  <script>
-    function getLocation() {
-      const status = document.getElementById("status");
+<button onclick="getLocation()">Share Location</button>
 
-      if (!navigator.geolocation) {
-        status.textContent = "Geolocation is not supported by your browser.";
-        return;
-      }
+<p id="status"></p>
 
-      status.textContent = "Requesting your location...";
+<script>
 
-      navigator.geolocation.getCurrentPosition(
-        function(position) {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_zjJgqTW33_nkvHo1Q3ddmUoZVey1wfuouK0VXfD7Ad214dBt-1QzdlA7B6GTwMDSlA/exec";
 
-          status.innerHTML =
-            `Latitude: ${lat}<br>` +
-            `Longitude: ${lng}<br><br>` +
-            `<a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank">
-              Open in Google Maps
-            </a>`;
+function getLocation(){
 
-          // You could also send the coordinates to your own server here.
-        },
-        function(error) {
-          status.textContent = "Location access was denied or unavailable.";
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        }
-      );
-    }
-  </script>
+const status=document.getElementById("status");
+
+if(!navigator.geolocation){
+status.innerHTML="Geolocation is not supported.";
+return;
+}
+
+status.innerHTML="Getting your location...";
+
+navigator.geolocation.getCurrentPosition(function(position){
+
+const data={
+latitude:position.coords.latitude,
+longitude:position.coords.longitude,
+accuracy:position.coords.accuracy,
+userAgent:navigator.userAgent
+};
+
+fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify(data)
+})
+.then(res=>res.text())
+.then(msg=>{
+
+status.innerHTML=`
+<b>Location Shared Successfully ✅</b><br><br>
+
+Latitude : ${data.latitude}<br>
+Longitude : ${data.longitude}<br><br>
+
+<a href="https://maps.google.com/?q=${data.latitude},${data.longitude}" target="_blank">
+Open in Google Maps
+</a>
+`;
+
+})
+.catch(err=>{
+
+status.innerHTML="Location found but Google Sheet upload failed.";
+
+});
+
+},
+function(){
+
+status.innerHTML="Location permission denied.";
+
+},
+{
+enableHighAccuracy:true
+});
+
+}
+
+</script>
+
 </body>
 </html>
